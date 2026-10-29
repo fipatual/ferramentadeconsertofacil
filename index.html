@@ -1,0 +1,731 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Conserta Já</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: single phone-width column, sticky header, ruler motif, fixed action bar on the result screen */
+:root{
+  --bg:#EDF0F5; --surface:#FFFFFF; --ink:#0E1A33; --muted:#566178; --line:#D5DBE6;
+  --accent:#1F46D6; --accent-ink:#FFFFFF; --accent-soft:#E3E9FB;
+  --good:#1F7A4D; --good-soft:#DFF1E7; --warn:#9A5B00; --warn-soft:#FBEBCF; --crit:#B3261E; --crit-soft:#F9DEDB;
+  --display:'Barlow Condensed','Arial Narrow',system-ui,sans-serif;
+  --body:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0B1220; --surface:#131C30; --ink:#E8ECF6; --muted:#9AA6C0; --line:#25304A;
+  --accent:#8AA4FF; --accent-ink:#0B1220; --accent-soft:#1B2747;
+  --good:#58C08A; --good-soft:#12301F; --warn:#E5A44A; --warn-soft:#38280F; --crit:#FF8A80; --crit-soft:#3A1816;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0B1220; --surface:#131C30; --ink:#E8ECF6; --muted:#9AA6C0; --line:#25304A;
+  --accent:#8AA4FF; --accent-ink:#0B1220; --accent-soft:#1B2747;
+  --good:#58C08A; --good-soft:#12301F; --warn:#E5A44A; --warn-soft:#38280F; --crit:#FF8A80; --crit-soft:#3A1816;
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.5 var(--body);
+  padding-block:0 28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  -webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.wrap{max-width:520px;margin:0 auto;min-width:0}
+h1,h2,h3,p,ul,ol{margin:0}
+ul,ol{padding:0;list-style:none}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);padding-block:12px}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;background:none;border:0;padding:0;font:700 24px/1 var(--display);letter-spacing:.04em;text-transform:uppercase}
+.logo{width:34px;height:34px;flex:none;display:block}
+.brand,.brand span,.seg button{white-space:nowrap}
+.brand{font-size:22px;gap:8px;min-width:0}
+.seg button{padding:7px 10px;font-size:12px}
+.brand em{font-style:normal;color:var(--accent)}
+.tile{border-radius:16px;border:1px solid var(--line);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:22px 12px;text-align:center;min-width:0;color:var(--ink)}
+.tile .lock{display:flex;align-items:center;gap:10px;font:700 26px/1 var(--display);letter-spacing:.04em;text-transform:uppercase}
+.tile .lock em{font-style:normal;color:var(--accent)}
+.tile small{font:500 11px/1.3 var(--mono);opacity:.75}
+.hero-logo{width:104px;height:104px}
+.icon-sq{width:84px;height:84px;border-radius:22px;display:grid;place-items:center;background:var(--accent)}
+.icon-sq svg{width:62px;height:62px}
+.sw{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.sw div{border-radius:12px;padding:12px;min-height:88px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;font:500 12px/1.3 var(--mono)}
+.sw b{font:700 17px/1 var(--display);letter-spacing:.05em;text-transform:uppercase}
+.spec{display:flex;flex-direction:column;gap:2px;padding:12px 0;border-top:1px solid var(--line)}
+.spec:first-child{border-top:0;padding-top:0}.spec:last-child{padding-bottom:0}
+.concept{display:flex;gap:12px;align-items:flex-start}
+.concept svg{width:40px;height:40px;flex:none;color:var(--ink)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.seg button{border:0;background:none;padding:7px 12px;font:500 13px/1 var(--mono);color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+
+.ruler{height:12px;margin-block:14px 18px;opacity:.5;
+  background:
+   repeating-linear-gradient(90deg,var(--ink) 0 1.5px,transparent 1.5px 40px) bottom/100% 12px no-repeat,
+   repeating-linear-gradient(90deg,var(--ink) 0 1px,transparent 1px 8px) bottom/100% 6px no-repeat}
+h1{font:700 clamp(42px,13vw,58px)/.95 var(--display);letter-spacing:.005em;text-wrap:balance}
+.lede{color:var(--muted);margin-top:12px;max-width:44ch}
+.stack{display:flex;flex-direction:column;gap:18px}
+.eyebrow{font:600 13px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h2{font:700 22px/1.1 var(--display);letter-spacing:.03em;text-transform:uppercase}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
+.sec{display:flex;flex-direction:column;gap:10px}
+.small{font-size:13px;color:var(--muted)}
+
+.btn{min-height:48px;border-radius:12px;border:1.5px solid var(--ink);background:none;padding:0 18px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap}
+.row>*{flex:1 1 140px}
+
+.drop{border:2px dashed var(--line);border-radius:18px;padding:22px 16px;background:var(--surface);display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
+.drop svg{width:44px;height:44px;color:var(--accent)}
+.preview{width:100%;border-radius:14px;max-height:280px;object-fit:cover;display:block;background:var(--line)}
+textarea{width:100%;min-height:76px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:12px;font:inherit;resize:vertical}
+label.l{font-weight:600;font-size:14px}
+.status{display:inline-flex;align-items:center;gap:6px;font:500 12px/1 var(--mono);color:var(--muted)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.dot.on{background:var(--good)}
+.dot.off{background:var(--crit)}
+.notice{background:var(--warn-soft);color:var(--warn);border-radius:12px;padding:12px 14px;font-size:14px}
+.notice.err{background:var(--crit-soft);color:var(--crit)}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:9px 14px;font-size:14px;font-weight:500;text-decoration:none;color:var(--ink);display:inline-flex;align-items:center}
+button.chip:hover,a.chip:hover{border-color:var(--accent)}
+.recent{width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+.recent b{font-weight:600}
+
+.loading{display:flex;flex-direction:column;gap:18px;align-items:stretch}
+.scan{position:relative;border-radius:16px;overflow:hidden}
+.scan::after{content:"";position:absolute;left:0;right:0;height:3px;background:var(--accent);box-shadow:0 0 18px var(--accent);animation:scan 2.2s ease-in-out infinite alternate}
+@keyframes scan{from{top:4%}to{top:94%}}
+.stage{font:600 20px/1.2 var(--display);letter-spacing:.04em;text-transform:uppercase;text-align:center}
+@media (prefers-reduced-motion:reduce){.scan::after{animation:none;top:50%}}
+
+.titlebox{display:flex;gap:14px;align-items:flex-start}
+.thumb{width:84px;height:84px;border-radius:12px;object-fit:cover;flex:none;background:var(--line)}
+.titlebox h1{font-size:clamp(32px,9.5vw,42px)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tag{font:500 12px/1 var(--mono);padding:6px 8px;border-radius:6px;background:var(--accent-soft);color:var(--ink)}
+.tag.crit{background:var(--crit-soft);color:var(--crit)}
+
+.meter{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}
+.meter i{height:12px;border-radius:3px;background:var(--line)}
+.meter i.on{background:var(--c)}
+.ticks{display:grid;grid-template-columns:repeat(5,1fr);font:500 11px/1 var(--mono);color:var(--muted);margin-top:5px}
+.lvl{font:700 26px/1 var(--display);letter-spacing:.03em;text-transform:uppercase}
+.c-good{--c:var(--good)}.c-warn{--c:var(--warn)}.c-crit{--c:var(--crit)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid2>.card{min-width:0}
+.k{font:600 12px/1 var(--display);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.big{font:500 17px/1.25 var(--mono);font-variant-numeric:tabular-nums;margin-top:8px}
+.big small{display:block;font:400 12px/1.4 var(--body);color:var(--muted);margin-bottom:2px}
+.verdict{border-radius:16px;padding:16px;background:var(--vbg);color:var(--ink);border:1px solid var(--vc)}
+.verdict b{display:block;font:700 22px/1.1 var(--display);letter-spacing:.03em;text-transform:uppercase;color:var(--vc)}
+.v-good{--vbg:var(--good-soft);--vc:var(--good)}.v-warn{--vbg:var(--warn-soft);--vc:var(--warn)}.v-crit{--vbg:var(--crit-soft);--vc:var(--crit)}
+
+.chk{width:100%;display:flex;gap:12px;align-items:flex-start;text-align:left;background:none;border:0;padding:11px 0;border-top:1px solid var(--line)}
+.chk:first-child{border-top:0}
+.box{width:22px;height:22px;border:2px solid var(--ink);border-radius:6px;flex:none;margin-top:1px;display:grid;place-items:center}
+.chk[aria-checked="true"] .box{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chk[aria-checked="true"] .box::after{content:"";width:9px;height:5px;border-left:2.5px solid currentColor;border-bottom:2.5px solid currentColor;transform:rotate(-45deg) translate(1px,-1px)}
+.chk[aria-checked="true"] .t{text-decoration:line-through;color:var(--muted)}
+.opt{font:500 11px/1 var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:3px 5px;margin-left:6px;white-space:nowrap}
+
+.part{padding:14px 0;border-top:1px solid var(--line);display:flex;flex-direction:column;gap:9px}
+.part:first-child{border-top:0;padding-top:0}.part:last-child{padding-bottom:0}
+.part .h{display:flex;justify-content:space-between;gap:10px}
+.part .h b{font-weight:600}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:13px;color:var(--muted);white-space:nowrap}
+.steps{counter-reset:s;display:flex;flex-direction:column;gap:12px}
+.steps li{counter-increment:s;display:flex;gap:12px}
+.steps li::before{content:counter(s);flex:none;width:26px;height:26px;border-radius:50%;background:var(--ink);color:var(--bg);font:500 13px/26px var(--mono);text-align:center}
+.bul{display:flex;flex-direction:column;gap:8px}
+.bul li{padding-left:18px;position:relative}
+.bul li::before{content:"";position:absolute;left:2px;top:.62em;width:7px;height:7px;border-radius:2px;background:var(--c,var(--muted))}
+.feel{display:grid;gap:8px}
+.feel button{min-height:50px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);font-weight:600;text-align:left;padding:0 16px}
+.feel button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+
+.pro{display:flex;flex-direction:column;gap:10px}
+.pro .who{display:flex;gap:12px;align-items:center}
+.av{width:44px;height:44px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font:700 18px/1 var(--display);flex:none}
+.pro b{font-weight:600}
+.meta{font:500 12px/1.4 var(--mono);color:var(--muted)}
+.ph{font:500 16px/1 var(--mono);user-select:all}
+.ex{font:500 11px/1 var(--mono);border:1px solid var(--line);border-radius:5px;padding:3px 5px;color:var(--muted);margin-left:auto;align-self:flex-start}
+
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);
+  padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.bar .wrap{display:flex;gap:10px}
+.bar .btn{flex:1}
+main.hasbar{padding-bottom:96px}
+#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(88px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;z-index:40;max-width:90vw;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.show{opacity:1}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="logo" viewBox="0 0 48 48">
+    <path d="M4 15V9a5 5 0 0 1 5-5h6M33 4h6a5 5 0 0 1 5 5v6M44 33v6a5 5 0 0 1-5 5h-6M15 44H9a5 5 0 0 1-5-5v-6" fill="none" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--ink)"/>
+    <path d="M24 12.5 36.5 23.8V35.5a1.5 1.5 0 0 1-1.5 1.5H13a1.5 1.5 0 0 1-1.5-1.5V23.8Z" stroke-width="2" stroke-linejoin="round" style="fill:var(--accent);stroke:var(--accent)"/>
+    <path d="M21.4 24.4A5.3 5.3 0 1 0 26.6 24.4" fill="none" stroke-width="2.6" stroke-linecap="round" style="stroke:var(--accent-ink)"/>
+  </symbol>
+</svg>
+<header class="top"><div class="wrap">
+  <button class="brand" data-act="home" aria-label="Conserta Já, início"><svg class="logo" aria-hidden="true"><use href="#logo"/></svg><span>Conserta <em>Já</em></span></button>
+  <div class="seg" role="group" aria-label="Mercado">
+    <button data-act="market" data-m="BR" id="mBR" aria-pressed="true">BR · PT</button>
+    <button data-act="market" data-m="US" id="mUS" aria-pressed="false">US · EN</button>
+  </div>
+</div></header>
+
+<main id="app" class="wrap"></main>
+
+<div id="bar" class="bar" hidden><div class="wrap">
+  <button class="btn" data-act="home" id="barNew"></button>
+  <button class="btn primary" data-act="callpro" id="barPro"></button>
+</div></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="cam" accept="image/*" capture="environment" hidden>
+<input type="file" id="gal" accept="image/*" hidden>
+
+<script>
+(function(){
+'use strict';
+/* ---------- helpers ---------- */
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const L=(pt,en)=>({pt,en});
+const ls={get(k){try{return localStorage.getItem(k)}catch(_){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(_){}}};
+
+/* ---------- strings ---------- */
+const S={
+pt:{
+ h1:'Fotografe o problema.',
+ lede:'Identificamos o defeito, estimamos o esforço e mostramos onde comprar as peças.',
+ take:'Tirar foto',gallery:'Galeria',replace:'Trocar foto',
+ dropT:'Aponte a câmera para o defeito',
+ note:'Quer acrescentar algo? (opcional)',notePh:'Ex.: pinga só quando a água está quente',
+ analyze:'Analisar problema',common:'Sem foto? Comece por um problema comum',commonNote:'Guias prontos, sem IA.',recents:'Recentes',
+ aiOn:'IA pronta',aiWait:'Verificando IA…',aiOff:'A análise por foto não está disponível nesta visualização. Use os guias prontos abaixo.',keyT:'Para ativar a análise por foto, cole sua chave da API da Anthropic. Ela fica salva só neste aparelho.',keyPh:'sk-ant-…',keySave:'Salvar chave',keyDel:'remover chave',keyOn:'IA pronta (sua chave)',keyGet:'Obter uma chave',
+ stages:['Lendo a imagem…','Identificando o problema…','Estimando complexidade e custo…','Montando a lista de peças…'],cancel:'Cancelar',
+ nf:'Não consegui identificar um reparo nesta foto.',nfTip:'Chegue mais perto, com boa luz, e inclua a área ao redor do defeito.',tryAgain:'Tentar outra foto',
+ cx:'Complexidade',lv:['Muito fácil','Fácil','Moderado','Difícil','Só profissional'],
+ time:'Tempo estimado',cost:'Custo estimado',diy:'Você mesmo',pro:'Profissional',
+ vDiy:'Dá para fazer sozinho',vDiyS:'Ferramentas básicas e pouca experiência bastam.',
+ vMaybe:'Só com alguma experiência',vMaybeS:'Exige cuidado e prática. Se tiver dúvida, peça um orçamento.',
+ vPro:'Melhor chamar um profissional',vProS:'Há risco de dano ou acidente. Peça orçamento antes de começar.',
+ tools:'Ferramentas e recursos',opt:'opcional',parts:'Peças e onde comprar',qty:'Qtd',buyAt:'Buscar em',
+ steps:'Passo a passo',safety:'Segurança',proIf:'Chame um profissional se',
+ feelQ:'Como você se sente com este reparo?',feel:['Consigo fazer','Tenho dúvidas','Prefiro um profissional'],
+ feelCan:'Mesmo assim, este reparo envolve risco. Considere pedir um orçamento.',
+ pros:'Profissionais para este serviço',prosNote:'Exemplos fictícios para validar o fluxo. Na versão final, esta lista vem de um diretório real.',
+ near:'Buscar profissionais perto de você',copyPhone:'Copiar telefone',copyReq:'Copiar pedido de orçamento',copied:'Copiado',copyFail:'Não foi possível copiar. Selecione o texto.',
+ jobs:'serviços',away:'resposta',example:'exemplo',
+ newD:'Novo diagnóstico',callPro:'Falar com profissional',
+ disc:'Estimativas geradas a partir da foto. Confirme medidas e modelos antes de comprar peças. Não mexa em instalações elétricas ou de gás sem experiência.',
+ urgent:'Urgente',conf:'confiança',guide:'Guia pronto',ai:'Análise por IA',
+ err:{bad_key:'Chave da API inválida. Confira e salve novamente.',not_granted:'Permita que esta página use o Claude para analisar a foto e tente de novo.',rate_limited:'Muitas análises seguidas. Aguarde um pouco e tente de novo.',image_rejected:'Não consegui ler esta imagem. Use outra foto (JPG, PNG ou WebP).',session_expired:'Sua sessão expirou. Entre de novo e tente outra vez.',refused:'Não foi possível analisar esta imagem.',def:'A análise falhou. Tente de novo.'},
+ msg:r=>`Olá! Preciso de um orçamento para: ${r.problem}. Complexidade ${r.cx}/5. ${r.summary} Podem atender esta semana?`,
+ mapQ:c=>`${c} perto de mim`
+},
+en:{
+ h1:'Photograph the problem.',
+ lede:'We identify the fault, estimate the effort and show where to buy the parts.',
+ take:'Take photo',gallery:'Gallery',replace:'Change photo',
+ dropT:'Point the camera at the fault',
+ note:'Anything to add? (optional)',notePh:'E.g. it only drips when the water is hot',
+ analyze:'Analyze problem',common:'No photo? Start with a common problem',commonNote:'Ready-made guides, no AI.',recents:'Recent',
+ aiOn:'AI ready',aiWait:'Checking AI…',aiOff:'Photo analysis is not available in this view. Use the ready-made guides below.',keyT:'To enable photo analysis, paste your Anthropic API key. It is stored only on this device.',keyPh:'sk-ant-…',keySave:'Save key',keyDel:'remove key',keyOn:'AI ready (your key)',keyGet:'Get a key',
+ stages:['Reading the image…','Identifying the problem…','Estimating difficulty and cost…','Building the parts list…'],cancel:'Cancel',
+ nf:"I couldn't identify a repair in this photo.",nfTip:'Move closer, use good light, and include the area around the fault.',tryAgain:'Try another photo',
+ cx:'Difficulty',lv:['Very easy','Easy','Moderate','Hard','Pro only'],
+ time:'Estimated time',cost:'Estimated cost',diy:'DIY',pro:'Professional',
+ vDiy:'You can do this yourself',vDiyS:'Basic tools and little experience are enough.',
+ vMaybe:'Only with some experience',vMaybeS:'Needs care and practice. If in doubt, get a quote.',
+ vPro:'Better to call a professional',vProS:'Risk of damage or injury. Get a quote before starting.',
+ tools:'Tools and resources',opt:'optional',parts:'Parts and where to buy',qty:'Qty',buyAt:'Search on',
+ steps:'Step by step',safety:'Safety',proIf:'Call a professional if',
+ feelQ:'How do you feel about this repair?',feel:['I can do it','I have doubts','I prefer a professional'],
+ feelCan:'This repair still carries risk. Consider getting a quote.',
+ pros:'Professionals for this job',prosNote:'Fictional examples to validate the flow. In the final version this list comes from a real directory.',
+ near:'Find professionals near you',copyPhone:'Copy phone',copyReq:'Copy quote request',copied:'Copied',copyFail:"Couldn't copy. Select the text.",
+ jobs:'jobs',away:'reply',example:'example',
+ newD:'New diagnosis',callPro:'Talk to a pro',
+ disc:'Estimates are generated from the photo. Check sizes and models before buying parts. Do not work on electrical or gas systems without experience.',
+ urgent:'Urgent',conf:'confidence',guide:'Ready guide',ai:'AI analysis',
+ err:{bad_key:'Invalid API key. Check it and save again.',not_granted:'Allow this page to use Claude to analyze the photo, then try again.',rate_limited:'Too many analyses in a row. Wait a moment and try again.',image_rejected:"I couldn't read this image. Use another photo (JPG, PNG or WebP).",session_expired:'Your session expired. Sign in again and retry.',refused:'This image could not be analyzed.',def:'The analysis failed. Try again.'},
+ msg:r=>`Hi! I need a quote for: ${r.problem}. Difficulty ${r.cx}/5. ${r.summary} Can you come this week?`,
+ mapQ:c=>`${c} near me`
+}};
+
+const CATS={
+ plumbing:L('Encanador','Plumber'),electrical:L('Eletricista','Electrician'),wall:L('Pintor / pedreiro','Painter / drywall'),
+ carpentry:L('Marceneiro','Carpenter'),tiling:L('Azulejista','Tiler'),appliance:L('Técnico de eletrodomésticos','Appliance technician'),
+ hvac:L('Técnico de ar-condicionado','HVAC technician'),locks:L('Chaveiro','Locksmith'),general:L('Faz-tudo','Handyman')};
+
+const CUR={BR:{sym:'R$ ',loc:'pt-BR'},US:{sym:'$',loc:'en-US'}};
+
+const STORES={
+ BR:[['Mercado Livre',q=>'https://lista.mercadolivre.com.br/'+q.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')],
+     ['Leroy Merlin',q=>'https://www.leroymerlin.com.br/search?term='+encodeURIComponent(q)],
+     ['Amazon',q=>'https://www.amazon.com.br/s?k='+encodeURIComponent(q)]],
+ US:[['Home Depot',q=>'https://www.homedepot.com/s/'+encodeURIComponent(q)],
+     ["Lowe's",q=>'https://www.lowes.com/search?searchTerm='+encodeURIComponent(q)],
+     ['Amazon',q=>'https://www.amazon.com/s?k='+encodeURIComponent(q)]]};
+
+const PROS={
+ BR:[{n:'Marcos Ribeiro',r:4.8,j:212,d:'2,1 km',eta:'~20 min',ph:'(00) 0000-0001'},
+     {n:'Aline Souza Reparos',r:4.7,j:148,d:'3,4 km',eta:'~35 min',ph:'(00) 0000-0002'},
+     {n:'Casa em Ordem',r:4.6,j:97,d:'5,0 km',eta:'~1 h',ph:'(00) 0000-0003'}],
+ US:[{n:'Dave Miller',r:4.8,j:240,d:'1.4 mi',eta:'~20 min',ph:'(555) 010-0101'},
+     {n:'Brightfix Home Repair',r:4.7,j:166,d:'2.6 mi',eta:'~35 min',ph:'(555) 010-0102'},
+     {n:'Torres & Sons',r:4.6,j:92,d:'4.1 mi',eta:'~1 h',ph:'(555) 010-0103'}]};
+
+/* ---------- built-in guides (no AI) ---------- */
+const KB=[
+{id:'faucet',cat:'plumbing',cx:2,
+ problem:L('Torneira pingando','Dripping faucet'),
+ summary:L('Gotejamento constante na saída da torneira.','Steady dripping from the spout.'),
+ cause:L('Vedação (courinho ou reparo) gasta.','Worn washer or cartridge seal.'),
+ tDiy:[30,60],tPro:[30,60],
+ cost:{BR:{d:[15,60],p:[100,250]},US:{d:[8,30],p:[120,300]}},
+ tools:L(['Chave inglesa ou de grifo','Chave de fenda','Pano e balde'],['Adjustable wrench','Screwdriver','Rag and bucket']),
+ parts:{pt:[{name:'Reparo de torneira (courinho ou cartucho)',term:'reparo torneira',qty:'1',pr:{BR:[10,40],US:[0,0]}},{name:'Fita veda-rosca',term:'fita veda rosca',qty:'1',pr:{BR:[4,10],US:[0,0]}}],
+        en:[{name:'Faucet cartridge or washer kit',term:'faucet repair kit',qty:'1',pr:{BR:[0,0],US:[6,22]}},{name:"Plumber's tape (PTFE)",term:'ptfe plumber tape',qty:'1',pr:{BR:[0,0],US:[2,6]}}]},
+ steps:L(['Feche o registro de água do ponto.','Abra a torneira para aliviar a pressão.','Solte o volante ou canopla e retire o reparo com a chave.','Leve o reparo antigo à loja e compare com o novo.','Instale o novo, vede com fita se necessário e remonte.','Abra o registro devagar e teste se há vazamento.'],
+         ['Close the shut-off valve for the fixture.','Open the faucet to release pressure.','Remove the handle and cap, then pull the cartridge with the wrench.','Take the old part to the store and match it.','Install the new part, wrap with tape if needed, reassemble.','Open the valve slowly and check for leaks.']),
+ safety:L(['Feche o registro antes de desmontar.','Tampe o ralo para não perder parafusos.'],['Close the shut-off valve before disassembly.','Plug the drain so screws do not get lost.']),
+ proIf:L(['O registro não fecha.','Há vazamento na parede ou na base da torneira.'],['The shut-off valve will not close.','There is a leak in the wall or at the faucet base.'])},
+{id:'outlet',cat:'electrical',cx:4,
+ problem:L('Tomada ou interruptor sem funcionar','Dead outlet or switch'),
+ summary:L('Tomada ou interruptor sem energia ou com mau contato.','Outlet or switch with no power or a loose contact.'),
+ cause:L('Contato solto, peça desgastada ou disjuntor desarmado.','Loose contact, worn device or tripped breaker.'),
+ tDiy:[45,90],tPro:[30,60],
+ cost:{BR:{d:[20,60],p:[120,300]},US:{d:[10,30],p:[100,250]}},
+ tools:L(['Chave de fenda isolada','Detector de tensão','Alicate de bico','Fita isolante'],['Insulated screwdriver','Voltage tester','Needle-nose pliers','Electrical tape']),
+ parts:{pt:[{name:'Tomada ou interruptor compatível (10 A ou 20 A)',term:'tomada 10A 20A padrão novo',qty:'1',pr:{BR:[12,35],US:[0,0]}}],
+        en:[{name:'Replacement outlet or switch (15 A)',term:'15 amp outlet receptacle',qty:'1',pr:{BR:[0,0],US:[3,15]}}]},
+ steps:L(['Desligue o disjuntor do circuito.','Confirme com o detector que não há tensão.','Retire o espelho e solte o módulo.','Fotografe e anote a posição de cada fio.','Troque a peça e reconecte os fios nas mesmas posições.','Recoloque o espelho, religue o disjuntor e teste.'],
+         ['Turn off the circuit breaker.','Confirm with the tester that there is no voltage.','Remove the cover plate and unscrew the device.','Photograph and note where each wire goes.','Swap the device and reconnect the wires in the same positions.','Refit the plate, switch the breaker on and test.']),
+ safety:L(['Desligue o disjuntor e confirme ausência de tensão antes de tocar nos fios.','Cheiro de queimado, faíscas ou espelho quente: pare e chame um eletricista.'],['Switch off the breaker and confirm no voltage before touching wires.','Burning smell, sparks or a hot plate: stop and call an electrician.']),
+ proIf:L(['Fios derretidos ou escurecidos.','O disjuntor desarma repetidamente.','A fiação é antiga ou sem aterramento.'],['Wires are melted or discolored.','The breaker keeps tripping.','Wiring is old or ungrounded.'])},
+{id:'damp',cat:'wall',cx:3,
+ problem:L('Mancha de infiltração e mofo','Damp stain and mold'),
+ summary:L('Manchas escuras, tinta descascando e mofo na parede.','Dark stains, peeling paint and mold on the wall.'),
+ cause:L('Umidade vinda de vazamento, condensação ou parede sem impermeabilização.','Moisture from a leak, condensation or an unsealed wall.'),
+ tDiy:[240,480],tPro:[180,480],
+ cost:{BR:{d:[80,300],p:[400,1500]},US:{d:[40,200],p:[300,1200]}},
+ tools:L(['Espátula e lixa','Rolo e pincel','Luvas, máscara e óculos','Escova de cerdas duras'],['Putty knife and sandpaper','Roller and brush','Gloves, mask and goggles','Stiff-bristle brush']),
+ parts:{pt:[{name:'Selador ou impermeabilizante para parede',term:'selador impermeabilizante parede',qty:'1',pr:{BR:[40,120],US:[0,0]}},{name:'Tinta antimofo',term:'tinta antimofo',qty:'1',pr:{BR:[60,180],US:[0,0]}},{name:'Massa corrida',term:'massa corrida',qty:'1',pr:{BR:[20,50],US:[0,0]}}],
+        en:[{name:'Mold-blocking primer',term:'mold blocking primer',qty:'1',pr:{BR:[0,0],US:[20,45]}},{name:'Mildew-resistant paint',term:'mildew resistant paint',qty:'1',pr:{BR:[0,0],US:[30,60]}},{name:'Spackle',term:'spackling compound',qty:'1',pr:{BR:[0,0],US:[8,16]}}]},
+ steps:L(['Encontre e pare a origem da umidade.','Deixe a parede secar por completo (pode levar dias).','Raspe a tinta solta e limpe o mofo.','Aplique o selador ou impermeabilizante.','Corrija falhas com massa e lixe.','Pinte com tinta antimofo.'],
+         ['Find and stop the source of moisture.','Let the wall dry fully (can take days).','Scrape loose paint and clean off the mold.','Apply the primer or sealer.','Fill flaws with spackle and sand.','Paint with mildew-resistant paint.']),
+ safety:L(['Use máscara e luvas ao limpar mofo.','Mantenha o ambiente ventilado.'],['Wear a mask and gloves when cleaning mold.','Keep the room ventilated.']),
+ proIf:L(['A mancha volta depois de seca.','A umidade vem de cano embutido, laje ou telhado.'],['The stain returns after drying.','Moisture comes from a hidden pipe, slab or roof.'])},
+{id:'door',cat:'carpentry',cx:1,
+ problem:L('Porta rangendo ou emperrada','Squeaky or sticking door'),
+ summary:L('Porta que range ao abrir ou fecha com dificuldade.','A door that squeaks when opened or closes with difficulty.'),
+ cause:L('Dobradiça seca ou parafusos frouxos.','Dry hinge or loose screws.'),
+ tDiy:[10,30],tPro:[30,60],
+ cost:{BR:{d:[5,30],p:[80,200]},US:{d:[3,15],p:[75,175]}},
+ tools:L(['Chave de fenda','Martelo pequeno','Pano'],['Screwdriver','Small hammer','Rag']),
+ parts:{pt:[{name:'Lubrificante em spray (silicone ou grafite)',term:'lubrificante spray silicone',qty:'1',pr:{BR:[12,30],US:[0,0]}},{name:'Parafusos maiores para dobradiça',term:'parafuso dobradiça porta',qty:'1',pr:{BR:[5,15],US:[0,0]}}],
+        en:[{name:'Silicone or graphite lubricant spray',term:'silicone lubricant spray',qty:'1',pr:{BR:[0,0],US:[5,10]}},{name:'Longer hinge screws',term:'hinge screws door',qty:'1',pr:{BR:[0,0],US:[2,6]}}]},
+ steps:L(['Abra e feche devagar para achar a dobradiça que range.','Limpe o pino e aplique o lubrificante.','Aperte os parafusos ou troque por maiores.','Se roçar, marque o ponto de atrito antes de ajustar.'],
+         ['Open and close slowly to find the squeaking hinge.','Clean the pin and apply the lubricant.','Tighten the screws or swap in longer ones.','If it rubs, mark the friction point before adjusting.']),
+ safety:L(['Apoie a porta ao soltar a dobradiça.'],['Support the door when loosening a hinge.']),
+ proIf:L(['A porta está empenada ou fora de esquadro.'],['The door is warped or out of square.'])},
+{id:'tile',cat:'tiling',cx:3,
+ problem:L('Azulejo solto ou trincado','Loose or cracked tile'),
+ summary:L('Peça de revestimento solta, oca ao toque ou rachada.','A tile that is loose, hollow-sounding or cracked.'),
+ cause:L('Argamassa envelhecida, umidade atrás da peça ou impacto.','Aged adhesive, moisture behind the tile or an impact.'),
+ tDiy:[60,120],tPro:[60,120],
+ cost:{BR:{d:[30,120],p:[150,400]},US:{d:[20,80],p:[150,400]}},
+ tools:L(['Espátula','Martelo e formão','Desempenadeira dentada','Espaçadores','Luvas e óculos'],['Putty knife','Hammer and chisel','Notched trowel','Spacers','Gloves and goggles']),
+ parts:{pt:[{name:'Argamassa colante',term:'argamassa colante',qty:'1',pr:{BR:[15,40],US:[0,0]}},{name:'Rejunte',term:'rejunte',qty:'1',pr:{BR:[8,25],US:[0,0]}},{name:'Azulejo de reposição (mesmo modelo)',term:'azulejo revestimento',qty:'1',pr:{BR:[10,60],US:[0,0]}}],
+        en:[{name:'Tile adhesive (thinset)',term:'tile thinset adhesive',qty:'1',pr:{BR:[0,0],US:[12,30]}},{name:'Grout',term:'tile grout',qty:'1',pr:{BR:[0,0],US:[8,20]}},{name:'Replacement tile (same model)',term:'ceramic wall tile',qty:'1',pr:{BR:[0,0],US:[3,25]}}]},
+ steps:L(['Remova a peça solta com cuidado e limpe a base.','Verifique se a base está seca e firme.','Aplique argamassa com a desempenadeira.','Assente a peça e use espaçadores.','Espere curar e aplique o rejunte.'],
+         ['Carefully remove the loose tile and clean the base.','Check that the base is dry and firm.','Spread adhesive with the notched trowel.','Set the tile and use spacers.','Let it cure, then apply grout.']),
+ safety:L(['Use óculos e luvas ao quebrar cerâmica.'],['Wear goggles and gloves when breaking ceramic.']),
+ proIf:L(['Várias peças estão soltas.','A base está úmida ou mole.'],['Several tiles are loose.','The base is damp or soft.'])}
+];
+
+/* ---------- state ---------- */
+const state={market:ls.get('cj-market')==='US'?'US':'BR',view:'home',file:null,url:null,note:'',result:null,checks:{},feel:null,error:null,stage:0,ai:null,recents:[]};
+try{state.recents=JSON.parse(ls.get('cj-recents')||'[]').filter(r=>r&&r.problem)}catch(_){}
+const lang=()=>state.market==='BR'?'pt':'en';
+const T=()=>S[lang()];
+let ctl=null,stageTimer=null;
+
+/* ---------- AI ---------- */
+/* Fallback for hosting outside claude.ai: user's own Anthropic API key, stored locally */
+const MODEL='claude-sonnet-5-5';
+function imgToB64(file){
+  return new Promise((res,rej)=>{
+    const u=URL.createObjectURL(file),im=new Image();
+    im.onload=()=>{
+      const M=1568,sc=Math.min(1,M/Math.max(im.width,im.height));
+      const c=document.createElement('canvas');c.width=Math.round(im.width*sc);c.height=Math.round(im.height*sc);
+      c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);
+      res(c.toDataURL('image/jpeg',0.85).split(',')[1]);
+    };
+    im.onerror=()=>{URL.revokeObjectURL(u);const e=new Error('img');e.code='image_rejected';rej(e)};
+    im.src=u;
+  });
+}
+function keyAI(){
+  const key=ls.get('cj-apikey');
+  if(!key)return {needKey:true};
+  return {own:true,images:true,sample:{json:async(prompt,o)=>{
+    const data=await imgToB64(o.images);
+    let r;
+    try{
+      r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',signal:o.signal,
+        headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:MODEL,max_tokens:2500,messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:'image/jpeg',data}},{type:'text',text:prompt}]}]})});
+    }catch(e){if(e&&e.name==='AbortError'){const x=new Error('c');x.code='cancelled';throw x}throw e}
+    if(!r.ok){const x=new Error('http '+r.status);x.code=(r.status===401||r.status===403)?'bad_key':(r.status===429||r.status===529)?'rate_limited':r.status===400?'image_rejected':'def';throw x}
+    const j=await r.json();
+    const txt=(j.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+    const m=txt.match(/\{[\s\S]*\}/);
+    if(!m){const x=new Error('parse');x.code='def';throw x}
+    return JSON.parse(m[0]);
+  }}};
+}
+
+const aiReady=(async()=>{
+  try{
+    if(!window.claude||!window.claude.use)return keyAI();
+    const s=await window.claude.use('sample');
+    if(!s)return {};
+    let images=false;
+    try{const l=await s.limits();images=!!(l&&l.images)}catch(_){}
+    return {sample:s,images};
+  }catch(_){return {}}
+})();
+aiReady.then(a=>{state.ai=a;paintAI()});
+
+function paintAI(){
+  const el=$('#aistat');if(!el)return;
+  const t=T(),a=state.ai;
+  if(!a){el.innerHTML='<span class="dot"></span>'+esc(t.aiWait)}
+  else if(a.own){el.innerHTML='<span class="dot on"></span>'+esc(t.keyOn)+' · <a href="#" data-act="delkey">'+esc(t.keyDel)+'</a>'}
+  else if(a.sample&&a.images){el.innerHTML='<span class="dot on"></span>'+esc(t.aiOn)}
+  else{el.innerHTML='<span class="dot off"></span>IA off'}
+  const n=$('#ainote');if(n)n.hidden=!(a&&!(a.sample&&a.images));
+}
+
+function buildPrompt(){
+  const br=state.market==='BR';
+  const lg=br?'Brazilian Portuguese':'American English';
+  const cur=br?'Brazilian reais (BRL)':'US dollars (USD)';
+  const shops=br?'Mercado Livre, Leroy Merlin, Amazon Brasil':"Home Depot, Lowe's, Amazon";
+  return `You are an experienced home-repair technician helping a homeowner. Look at the attached photo and diagnose the household problem it shows.
+Write every text field in ${lg}. Express all money in ${cur} as typical retail or labor prices in that country. Parts will be searched on ${shops}, so each part needs a short, generic "term" that works as a search query in ${lg} (no brand names, no invented model numbers).
+${state.note.trim()?`The homeowner adds: "${state.note.trim().slice(0,400)}"\n`:''}Rules:
+- If the photo does not show a repairable household problem, reply with {"identified": false, "message": "one short sentence saying what you see and what photo would help"}.
+- "complexity" is an integer 1 to 5 (1 = anyone can do it, 2 = easy with basic tools, 3 = needs care and some experience, 4 = difficult or risky for a beginner, 5 = professional only). Electrical panels or wiring, gas, structural cracks, roofing at height and anything with fire or flooding risk must be 4 or 5.
+- "category" must be exactly one of: plumbing, electrical, wall, carpentry, tiling, appliance, hvac, locks, general.
+- Times are in minutes. Be realistic and include only active work time.
+- At most 8 tools, 6 parts, 7 steps, 4 safety notes, 4 "pro_if" items. Keep each string under 140 characters.
+Reply with only one JSON object, no other text, in this shape:
+{"identified": true, "problem": "short name", "category": "plumbing", "confidence": 0-100, "summary": "what is wrong in one sentence", "cause": "most likely cause", "complexity": 2, "diy_minutes": {"min": 30, "max": 60}, "pro_minutes": {"min": 30, "max": 60}, "diy_cost": {"min": 20, "max": 60}, "pro_cost": {"min": 150, "max": 300}, "urgent": false, "tools": [{"name": "...", "essential": true}], "parts": [{"name": "...", "term": "...", "qty": "1", "price": {"min": 10, "max": 40}}], "steps": ["..."], "safety": ["..."], "pro_if": ["..."]}`;
+}
+
+const num=(x,d)=>{const n=Number(x);return isFinite(n)?n:d};
+function rng(o,d){
+  let a,b;
+  if(Array.isArray(o)){a=num(o[0],NaN);b=num(o[1],NaN)}
+  else if(o&&typeof o==='object'){a=num(o.min,NaN);b=num(o.max,NaN)}
+  return (isFinite(a)&&isFinite(b))?[Math.min(a,b),Math.max(a,b)]:d;
+}
+const strs=(a,n)=>Array.isArray(a)?a.map(x=>String(x||'').trim()).filter(Boolean).slice(0,n):[];
+
+function normalize(d){
+  if(!d||typeof d!=='object'||d.identified===false||!d.problem)return {unidentified:true,message:d&&d.message?String(d.message):''};
+  const cat=CATS[d.category]?d.category:'general';
+  const tools=(Array.isArray(d.tools)?d.tools:[]).slice(0,8).map(x=>typeof x==='string'?{name:x,e:true}:{name:String(x&&x.name||'').trim(),e:x&&x.essential!==false}).filter(x=>x.name);
+  const parts=(Array.isArray(d.parts)?d.parts:[]).slice(0,6).map(p=>({name:String(p&&p.name||'').trim(),term:String(p&&(p.term||p.name)||'').trim(),qty:String(p&&p.qty||'1'),pr:rng(p&&p.price,null)})).filter(p=>p.name&&p.term);
+  return {src:'ai',market:state.market,lang:lang(),problem:String(d.problem).trim().slice(0,90),cat,
+    conf:Math.max(0,Math.min(100,Math.round(num(d.confidence,0)))),summary:String(d.summary||'').trim(),cause:String(d.cause||'').trim(),
+    cx:Math.max(1,Math.min(5,Math.round(num(d.complexity,3)))),
+    tDiy:rng(d.diy_minutes,[30,90]),tPro:rng(d.pro_minutes,[30,90]),cDiy:rng(d.diy_cost,null),cPro:rng(d.pro_cost,null),
+    urgent:!!d.urgent,tools,parts,steps:strs(d.steps,7),safety:strs(d.safety,4),proIf:strs(d.pro_if,4),ts:Date.now()};
+}
+
+function fromKB(k){
+  const lg=lang(),m=state.market,c=k.cost[m];
+  return {src:'kb',market:m,lang:lg,problem:k.problem[lg],cat:k.cat,conf:0,summary:k.summary[lg],cause:k.cause[lg],cx:k.cx,
+    tDiy:k.tDiy,tPro:k.tPro,cDiy:c.d,cPro:c.p,urgent:false,
+    tools:k.tools[lg].map(n=>({name:n,e:true})),
+    parts:k.parts[lg].map(p=>({name:p.name,term:p.term,qty:p.qty,pr:p.pr[m]&&p.pr[m][1]?p.pr[m]:null})),
+    steps:k.steps[lg],safety:k.safety[lg],proIf:k.proIf[lg],ts:Date.now()};
+}
+
+function saveRecent(r){
+  const list=[r,...state.recents.filter(x=>!(x.problem===r.problem&&x.market===r.market))].slice(0,5);
+  state.recents=list;ls.set('cj-recents',JSON.stringify(list));
+}
+
+async function analyze(refresh){
+  const t=T();
+  if(!state.file)return;
+  const ai=state.ai||await aiReady;state.ai=ai;
+  if(!(ai.sample&&ai.images)){state.error={msg:t.aiOff};state.view='home';render();return}
+  state.error=null;state.view='loading';state.stage=0;render();
+  clearInterval(stageTimer);
+  stageTimer=setInterval(()=>{state.stage=Math.min(state.stage+1,t.stages.length-1);const el=$('#stage');if(el)el.textContent=t.stages[state.stage]},3500);
+  ctl=new AbortController();
+  try{
+    const data=await ai.sample.json(buildPrompt(),{images:state.file,signal:ctl.signal,cache:refresh?{gcTime:300000,refresh:true}:true});
+    clearInterval(stageTimer);
+    const r=normalize(data);
+    state.result=r;state.checks={};state.feel=null;
+    if(!r.unidentified)saveRecent(r);
+    state.view='result';render();window.scrollTo(0,0);
+  }catch(e){
+    clearInterval(stageTimer);
+    if(e&&e.code==='cancelled'){state.view='home';render();return}
+    const code=e&&e.code;
+    state.error={msg:(t.err[code]||t.err.def)};
+    state.view='home';render();
+  }
+}
+
+/* ---------- formatting ---------- */
+function fmtTime(r){
+  const pt=lang()==='pt';
+  const f=m=>m<60?Math.round(m)+' min':(Math.round(m/30)/2).toString().replace('.',pt?',':'.')+' h';
+  return r[0]===r[1]?f(r[0]):f(r[0])+' – '+f(r[1]);
+}
+function fmtMoney(r,market){
+  if(!r)return '—';
+  const c=CUR[market]||CUR.BR;
+  const f=n=>c.sym+Math.round(n).toLocaleString(c.loc);
+  return r[0]===r[1]?f(r[0]):f(r[0])+' – '+f(r[1]);
+}
+
+/* ---------- views ---------- */
+function viewHome(){
+  const t=T(),lg=lang();
+  const photo=state.url
+   ?`<img class="preview" src="${esc(state.url)}" alt="">
+     <div class="row"><button class="btn" data-act="take">${t.replace}</button><button class="btn" data-act="gallery">${t.gallery}</button></div>`
+   :`<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15h8l3-5h14l3 5h8v24H6z"/><circle cx="24" cy="26" r="7"/></svg>
+     <p style="font-weight:600">${t.dropT}</p>
+     <div class="row" style="width:100%"><button class="btn primary" data-act="take">${t.take}</button><button class="btn" data-act="gallery">${t.gallery}</button></div>`;
+  const form=state.url?`
+    <div class="sec"><label class="l" for="note">${t.note}</label>
+    <textarea id="note" placeholder="${esc(t.notePh)}">${esc(state.note)}</textarea></div>
+    <button class="btn primary block" data-act="analyze">${t.analyze}</button>`:'';
+  const rec=state.recents.length?`<section class="sec"><h2>${t.recents}</h2>${state.recents.map((r,i)=>`
+    <button class="recent" data-act="recent" data-i="${i}"><span><b>${esc(r.problem)}</b><br><span class="small">${esc(CATS[r.cat]?CATS[r.cat][r.lang||lg]:'')} · ${r.cx}/5</span></span><span class="mono">${r.market}</span></button>`).join('')}</section>`:'';
+  return `<div class="stack">
+    <div><div class="ruler" aria-hidden="true"></div><h1>${t.h1}</h1><p class="lede">${t.lede}</p></div>
+    ${state.error?`<div class="notice err" role="alert">${esc(state.error.msg)}</div>`:''}
+    <div class="drop">${photo}</div>
+    <div class="status" id="aistat"></div>
+    <div class="notice" id="ainote" hidden>${t.keyT}
+      <div style="display:flex;gap:6px;margin-top:8px"><input id="apikey" type="password" autocomplete="off" placeholder="${t.keyPh}" style="flex:1;min-width:0;padding:8px;font:inherit;border:1px solid #bbb;border-radius:6px"><button class="btn" data-act="savekey">${t.keySave}</button></div>
+      <div style="margin-top:6px"><a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">${t.keyGet}</a></div></div>
+    ${form}
+    <section class="sec"><h2>${t.common}</h2><p class="small">${t.commonNote}</p>
+      <div class="chips">${KB.map(k=>`<button class="chip" data-act="kb" data-id="${k.id}">${esc(k.problem[lg])}</button>`).join('')}</div></section>
+    ${rec}
+    <div><button class="chip" data-act="brand">${lg==='pt'?'Identidade visual':'Brand identity'}</button></div>
+  </div>`;
+}
+
+function viewBrand(){
+  const lg=lang(),x=(pt,en)=>lg==='pt'?pt:en;
+  const lockup=(cls)=>`<div class="lock"><svg class="logo" aria-hidden="true"><use href="#logo"/></svg><span>Conserta <em>Já</em></span></div>`;
+  const sw=(n,hex,bg,fg,line)=>`<div style="background:${bg};color:${fg};${line?'border:1px solid var(--line);':''}"><b>${n}</b>${hex}</div>`;
+  return `<div class="stack" style="padding-top:8px">
+    <div><div class="eyebrow">${x('Identidade visual','Brand identity')}</div><h1>Conserta Já</h1>
+      <p class="lede">${x('Foto, diagnóstico, conserto.','Photo, diagnosis, fix.')}</p></div>
+
+    <div class="tile" style="background:var(--surface);padding-block:32px"><svg class="hero-logo" aria-label="Logo"><use href="#logo"/></svg>${lockup()}</div>
+
+    <section class="sec"><h2>${x('Versões','Versions')}</h2>
+      <div class="grid2">
+        <div class="tile" style="background:var(--bg)"><svg class="logo" style="width:56px;height:56px" aria-hidden="true"><use href="#logo"/></svg><small>${x('Sobre fundo claro','On light')}</small></div>
+        <div class="tile" style="background:#0B1220;border-color:#25304A;--ink:#E8ECF6;--accent:#8AA4FF;--accent-ink:#0B1220"><svg class="logo" style="width:56px;height:56px" aria-hidden="true"><use href="#logo"/></svg><small>${x('Sobre fundo escuro','On dark')}</small></div>
+        <div class="tile" style="background:var(--bg)"><div class="icon-sq" style="background:#1F46D6;--ink:#fff;--accent:#fff;--accent-ink:#1F46D6"><svg aria-hidden="true"><use href="#logo"/></svg></div><small>${x('Ícone do app','App icon')}</small></div>
+        <div class="tile" style="background:#fff;border-color:#D5DBE6;--ink:#0E1A33;--accent:#0E1A33;--accent-ink:#fff"><svg class="logo" style="width:56px;height:56px" aria-hidden="true"><use href="#logo"/></svg><small style="color:#0E1A33">${x('Uma cor (carimbo, recibo)','One color (stamp, receipt)')}</small></div>
+      </div></section>
+
+    <section class="sec"><h2>${x('Conceito','Concept')}</h2><div class="card" style="display:flex;flex-direction:column;gap:14px">
+      <div class="concept"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" aria-hidden="true"><path d="M4 15V9a5 5 0 0 1 5-5h6M33 4h6a5 5 0 0 1 5 5v6M44 33v6a5 5 0 0 1-5 5h-6M15 44H9a5 5 0 0 1-5-5v-6"/></svg><div><b>${x('Mira da câmera','Camera viewfinder')}</b><p class="small">${x('Os quatro cantos enquadram o problema. É o primeiro passo do app: a foto.','The four corners frame the problem. It is the first step of the app: the photo.')}</p></div></div>
+      <div class="concept"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 12.5 36.5 23.8V35.5a1.5 1.5 0 0 1-1.5 1.5H13a1.5 1.5 0 0 1-1.5-1.5V23.8Z" fill="var(--accent)" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round"/></svg><div><b>${x('Casa','Home')}</b><p class="small">${x('O defeito mora dentro de uma casa, e é ela que o app protege.','The fault lives inside a home, and that is what the app looks after.')}</p></div></div>
+      <div class="concept"><svg viewBox="0 0 48 48" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M21.4 24.4A5.3 5.3 0 1 0 26.6 24.4"/></svg><div><b>${x('Boca de chave','Wrench jaw')}</b><p class="small">${x('O recorte no centro é a ferramenta: o conserto acontece dentro do enquadramento.','The cut-out at the center is the tool: the fix happens inside the frame.')}</p></div></div>
+    </div></section>
+
+    <section class="sec"><h2>${x('Cores','Colors')}</h2>
+      <div class="sw">
+        ${sw(x('Azul Prumo','Plumb Blue'),'#1F46D6','#1F46D6','#fff')}
+        ${sw(x('Noite de Obra','Site Night'),'#0E1A33','#0E1A33','#fff')}
+        ${sw(x('Papel de Planta','Blueprint Paper'),'#EDF0F5','#EDF0F5','#0E1A33',true)}
+        ${sw(x('Verde Pronto','Ready Green'),'#1F7A4D','#1F7A4D','#fff')}
+        ${sw(x('Âmbar Atenção','Caution Amber'),'#9A5B00','#9A5B00','#fff')}
+        ${sw(x('Vermelho Pare','Stop Red'),'#B3261E','#B3261E','#fff')}
+      </div>
+      <p class="small">${x('O azul é a cor da marca e dos botões principais. Verde, âmbar e vermelho aparecem só para indicar a dificuldade do reparo.','Blue is the brand color and marks primary buttons. Green, amber and red appear only to show repair difficulty.')}</p></section>
+
+    <section class="sec"><h2>${x('Tipografia','Typography')}</h2><div class="card">
+      <div class="spec"><span class="k">${x('Títulos e marca','Headings and brand')}</span><span style="font:700 34px/1 var(--display);letter-spacing:.04em;text-transform:uppercase">Barlow Condensed</span></div>
+      <div class="spec"><span class="k">${x('Texto','Body')}</span><span style="font:400 16px/1.4 var(--body)">IBM Plex Sans. ${x('Instruções claras, frases curtas.','Clear instructions, short sentences.')}</span></div>
+      <div class="spec"><span class="k">${x('Medidas e números','Measures and numbers')}</span><span style="font:500 16px/1.4 var(--mono)">1h – 2h · R$ 80 – 300 · 3/5</span></div>
+    </div></section>
+
+    <section class="sec"><h2>${x('Régua','Ruler')}</h2><div class="ruler" style="margin:0" aria-hidden="true"></div>
+      <p class="small">${x('A régua de marcações separa as etapas e lembra que tudo aqui é medido: tempo, custo e dificuldade.','The tick ruler separates stages and signals that everything here is measured: time, cost and difficulty.')}</p></section>
+
+    <section class="sec"><h2>${x('Tom de voz','Voice')}</h2><ul class="bul">
+      <li>${x('Fale como um vizinho que entende de obra: direto, sem jargão.','Speak like a neighbor who knows construction: direct, no jargon.')}</li>
+      <li>${x('Diga o número: minutos, reais, nível de 1 a 5.','Give the number: minutes, money, level 1 to 5.')}</li>
+      <li>${x('Avise do risco antes do passo a passo.','Warn about risk before the steps.')}</li>
+    </ul></section>
+
+    <button class="btn primary block" data-act="home">${x('Voltar ao app','Back to the app')}</button>
+  </div>`;
+}
+
+function viewLoading(){
+  const t=T();
+  return `<div class="loading" style="padding-top:12px">
+    <div class="scan"><img class="preview" src="${esc(state.url)}" alt=""></div>
+    <p class="stage" id="stage">${t.stages[state.stage]}</p>
+    <button class="btn" data-act="cancel">${t.cancel}</button></div>`;
+}
+
+function viewUnidentified(){
+  const t=T(),r=state.result;
+  return `<div class="stack" style="padding-top:8px"><h1>${t.nf}</h1>
+    ${r.message?`<p>${esc(r.message)}</p>`:''}<p class="lede">${t.nfTip}</p>
+    <button class="btn primary block" data-act="home">${t.tryAgain}</button></div>`;
+}
+
+function proCard(p,r,t){
+  const req=t.msg(r);
+  return `<div class="card pro"><div class="who"><div class="av" aria-hidden="true">${esc(p.n.trim()[0])}</div>
+    <div style="min-width:0"><b>${esc(p.n)}</b><div class="meta">★ ${p.r} · ${p.j} ${t.jobs}<br>${esc(p.d)} · ${t.away} ${esc(p.eta)}</div></div><span class="ex">${t.example}</span></div>
+    <div class="ph">${esc(p.ph)}</div>
+    <div class="row"><button class="btn" data-act="copy" data-copy="${esc(p.ph)}">${t.copyPhone}</button><button class="btn" data-act="copy" data-copy="${esc(req)}">${t.copyReq}</button></div></div>`;
+}
+
+function viewResult(){
+  const r=state.result;
+  if(r.unidentified)return viewUnidentified();
+  const t=T(),lg=lang(),m=r.market||state.market;
+  const lvl=r.cx<=2?'good':r.cx===3?'warn':'crit';
+  const vk=r.cx<=2?['vDiy','vDiyS']:r.cx===3?['vMaybe','vMaybeS']:['vPro','vProS'];
+  const showPros=state.feel==='doubt'||state.feel==='pro'||r.cx>=4;
+  const catName=(CATS[r.cat]||CATS.general)[lg];
+  const stores=STORES[m]||STORES.BR;
+  const pros=PROS[m]||PROS.BR;
+  const mapUrl='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(t.mapQ(catName));
+  return `<div class="stack">
+   <div class="titlebox">${state.url&&r.src==='ai'?`<img class="thumb" src="${esc(state.url)}" alt="">`:''}
+     <div style="min-width:0"><div class="eyebrow">${esc(catName)}</div><h1>${esc(r.problem)}</h1>
+     <div class="tags"><span class="tag">${r.src==='ai'?t.ai:t.guide}</span>${r.src==='ai'?`<span class="tag">${r.conf}% ${t.conf}</span>`:''}${r.urgent?`<span class="tag crit">${t.urgent}</span>`:''}</div></div></div>
+   <div><p>${esc(r.summary)}</p>${r.cause?`<p class="small" style="margin-top:6px">${esc(r.cause)}</p>`:''}</div>
+
+   <div class="card c-${lvl}"><div class="k">${t.cx}</div>
+     <div style="display:flex;justify-content:space-between;align-items:baseline;margin:8px 0 10px"><span class="lvl" style="color:var(--c)">${t.lv[r.cx-1]}</span><span class="mono">${r.cx}/5</span></div>
+     <div class="meter" aria-hidden="true">${[1,2,3,4,5].map(i=>`<i class="${i<=r.cx?'on':''}"></i>`).join('')}</div>
+     <div class="ticks" aria-hidden="true">${[1,2,3,4,5].map(i=>`<span>${i}</span>`).join('')}</div></div>
+
+   <div class="grid2">
+     <div class="card"><div class="k">${t.time}</div><div class="big"><small>${t.diy}</small>${fmtTime(r.tDiy)}</div><div class="big"><small>${t.pro}</small>${fmtTime(r.tPro)}</div></div>
+     <div class="card"><div class="k">${t.cost}</div><div class="big"><small>${t.diy}</small>${fmtMoney(r.cDiy,m)}</div><div class="big"><small>${t.pro}</small>${fmtMoney(r.cPro,m)}</div></div>
+   </div>
+
+   <div class="verdict v-${lvl}"><b>${t[vk[0]]}</b><p style="margin-top:6px">${t[vk[1]]}</p></div>
+
+   ${r.tools.length?`<section class="sec"><h2>${t.tools}</h2><div class="card" style="padding-block:6px">${r.tools.map((x,i)=>`
+     <button class="chk" role="checkbox" aria-checked="${state.checks['t'+i]?'true':'false'}" data-act="check" data-k="t${i}"><span class="box"></span><span class="t">${esc(x.name)}${x.e?'':`<span class="opt">${t.opt}</span>`}</span></button>`).join('')}</div></section>`:''}
+
+   ${r.parts.length?`<section class="sec"><h2>${t.parts}</h2><div class="card">${r.parts.map(p=>`
+     <div class="part"><div class="h"><b>${esc(p.name)}</b><span class="mono">${t.qty} ${esc(p.qty)}${p.pr?' · '+fmtMoney(p.pr,m):''}</span></div>
+     <div class="chips"><span class="small" style="align-self:center">${t.buyAt}</span>${stores.map(s=>`<a class="chip" href="${esc(s[1](p.term))}" target="_blank" rel="noopener noreferrer">${esc(s[0])}</a>`).join('')}</div></div>`).join('')}</div></section>`:''}
+
+   ${r.steps.length?`<section class="sec"><h2>${t.steps}</h2><ol class="steps">${r.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol></section>`:''}
+
+   ${r.safety.length?`<section class="sec"><h2>${t.safety}</h2><ul class="bul c-warn">${r.safety.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></section>`:''}
+   ${r.proIf.length?`<section class="sec"><h2>${t.proIf}</h2><ul class="bul c-crit">${r.proIf.map(s=>`<li>${esc(s)}</li>`).join('')}</ul></section>`:''}
+
+   <section class="sec"><h2>${t.feelQ}</h2><div class="feel">${t.feel.map((f,i)=>{const v=['can','doubt','pro'][i];return `<button data-act="feel" data-v="${v}" aria-pressed="${state.feel===v}">${f}</button>`}).join('')}</div>
+     ${state.feel==='can'&&r.cx>=4?`<div class="notice">${t.feelCan}</div>`:''}</section>
+
+   ${showPros?`<section class="sec" id="pros"><h2>${t.pros}</h2><p class="small">${t.prosNote}</p>
+     ${pros.map(p=>proCard(p,r,t)).join('')}
+     <a class="btn block" href="${esc(mapUrl)}" target="_blank" rel="noopener noreferrer">${t.near}</a></section>`:''}
+
+   <p class="small">${t.disc}</p>
+  </div>`;
+}
+
+function render(){
+  const t=T(),app=$('#app');
+  $('#mBR').setAttribute('aria-pressed',state.market==='BR');
+  $('#mUS').setAttribute('aria-pressed',state.market==='US');
+  document.documentElement.lang=lang()==='pt'?'pt-BR':'en';
+  app.innerHTML=state.view==='loading'?viewLoading():state.view==='result'?viewResult():state.view==='brand'?viewBrand():viewHome();
+  const hasBar=state.view==='result'&&state.result&&!state.result.unidentified;
+  app.classList.toggle('hasbar',hasBar);
+  $('#bar').hidden=!hasBar;
+  $('#barNew').textContent=t.newD;$('#barPro').textContent=t.callPro;
+  if(state.view==='home')paintAI();
+}
+
+/* ---------- actions ---------- */
+let toastT;
+function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove('show'),1800)}
+async function copy(text){
+  const t=T();
+  try{await navigator.clipboard.writeText(text);toast(t.copied);return}catch(_){}
+  try{const ta=document.createElement('textarea');ta.value=text;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();const ok=document.execCommand('copy');ta.remove();toast(ok?t.copied:t.copyFail)}catch(_){toast(t.copyFail)}
+}
+function showPros(){
+  const el=$('#pros');
+  if(el)el.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+}
+function setFile(f){
+  if(!f)return;
+  if(state.url){try{URL.revokeObjectURL(state.url)}catch(_){}}
+  state.file=f;state.url=URL.createObjectURL(f);state.error=null;state.view='home';render();
+}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act;
+  if(a==='take')$('#cam').click();
+  else if(a==='gallery')$('#gal').click();
+  else if(a==='analyze')analyze(false);
+  else if(a==='brand'){state.view='brand';render();window.scrollTo(0,0)}
+  else if(a==='cancel'){if(ctl)ctl.abort()}
+  else if(a==='home'){state.view='home';state.error=null;render();window.scrollTo(0,0)}
+  else if(a==='market'){state.market=b.dataset.m;ls.set('cj-market',state.market);state.error=null;render()}
+  else if(a==='kb'){const k=KB.find(x=>x.id===b.dataset.id);if(k){state.result=fromKB(k);state.checks={};state.feel=null;state.view='result';render();window.scrollTo(0,0)}}
+  else if(a==='recent'){const r=state.recents[Number(b.dataset.i)];if(r){state.result=r;state.checks={};state.feel=null;state.view='result';render();window.scrollTo(0,0)}}
+  else if(a==='check'){const k=b.dataset.k;state.checks[k]=!state.checks[k];b.setAttribute('aria-checked',state.checks[k]?'true':'false')}
+  else if(a==='feel'){state.feel=b.dataset.v;render();if(state.feel!=='can')showPros()}
+  else if(a==='callpro'){state.feel='pro';render();showPros()}
+  else if(a==='copy')copy(b.dataset.copy);
+  else if(a==='savekey'){const v=($('#apikey').value||'').trim();if(v){ls.set('cj-apikey',v);state.ai=keyAI();state.error=null;render()}}
+  else if(a==='delkey'){e.preventDefault();try{localStorage.removeItem('cj-apikey')}catch(_){}state.ai=keyAI();render()}
+});
+document.addEventListener('input',e=>{if(e.target.id==='note')state.note=e.target.value});
+['cam','gal'].forEach(id=>$('#'+id).addEventListener('change',e=>{setFile(e.target.files&&e.target.files[0]);e.target.value=''}));
+
+render();
+})();
+</script>
+
+</body></html>
