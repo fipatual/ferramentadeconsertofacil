@@ -23,7 +23,10 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).json({ error: 'method' });
 
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return res.status(500).json({ error: 'server_not_configured' });
+  if (!key) {
+    console.error('[analisar] ANTHROPIC_API_KEY não está definida neste deploy');
+    return res.status(500).json({ error: 'server_not_configured' });
+  }
 
   const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
   if (tooMany(ip)) return res.status(429).json({ error: 'rate_limited' });
@@ -50,12 +53,14 @@ module.exports = async (req, res) => {
     });
     const data = await r.json();
     if (!r.ok) {
+      console.error('[analisar] Anthropic respondeu', r.status, JSON.stringify(data && data.error));
       // 401/403 aqui significa problema na chave do servidor, não do usuário
       const status = (r.status === 401 || r.status === 403) ? 500 : r.status;
       return res.status(status).json({ error: 'upstream', status: r.status });
     }
     return res.status(200).json({ content: data.content });
   } catch (e) {
+    console.error('[analisar] falha ao chamar a Anthropic:', e && e.message);
     return res.status(502).json({ error: 'upstream_failed' });
   }
 };
