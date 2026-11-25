@@ -378,24 +378,32 @@ function imgToB64(file){
     im.src=u;
   });
 }
+/* Produção (Vercel): a chave fica no servidor, em /api/analisar. No GitHub Pages, cada usuário usa a própria chave. */
+const SERVER_AI=!/github\.io$/.test(location.hostname);
+async function callAI(url,headers,body,signal){
+  let r;
+  try{r=await fetch(url,{method:'POST',signal,headers,body:JSON.stringify(body)})}
+  catch(e){if(e&&e.name==='AbortError'){const x=new Error('c');x.code='cancelled';throw x}throw e}
+  if(!r.ok){const x=new Error('http '+r.status);x.code=(r.status===401||r.status===403)?'bad_key':(r.status===429||r.status===529)?'rate_limited':r.status===400?'image_rejected':'def';throw x}
+  const j=await r.json();
+  const txt=(j.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+  const m=txt.match(/\{[\s\S]*\}/);
+  if(!m){const x=new Error('parse');x.code='def';throw x}
+  return JSON.parse(m[0]);
+}
 function keyAI(){
   const key=ls.get('cj-apikey');
+  if(!key&&SERVER_AI)return {server:true,images:true,sample:{json:async(prompt,o)=>{
+    const data=await imgToB64(o.images);
+    return callAI('/api/analisar',{'content-type':'application/json'},{prompt,image:data},o.signal);
+  }}};
   if(!key)return {needKey:true};
   return {own:true,images:true,sample:{json:async(prompt,o)=>{
     const data=await imgToB64(o.images);
-    let r;
-    try{
-      r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',signal:o.signal,
-        headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-        body:JSON.stringify({model:MODEL,max_tokens:2500,messages:[{role:'user',content:[
-          {type:'image',source:{type:'base64',media_type:'image/jpeg',data}},{type:'text',text:prompt}]}]})});
-    }catch(e){if(e&&e.name==='AbortError'){const x=new Error('c');x.code='cancelled';throw x}throw e}
-    if(!r.ok){const x=new Error('http '+r.status);x.code=(r.status===401||r.status===403)?'bad_key':(r.status===429||r.status===529)?'rate_limited':r.status===400?'image_rejected':'def';throw x}
-    const j=await r.json();
-    const txt=(j.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
-    const m=txt.match(/\{[\s\S]*\}/);
-    if(!m){const x=new Error('parse');x.code='def';throw x}
-    return JSON.parse(m[0]);
+    return callAI('https://api.anthropic.com/v1/messages',
+      {'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      {model:MODEL,max_tokens:2500,messages:[{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:'image/jpeg',data}},{type:'text',text:prompt}]}]},o.signal);
   }}};
 }
 
@@ -416,6 +424,7 @@ function paintAI(){
   const t=T(),a=state.ai;
   if(!a){el.innerHTML='<span class="dot"></span>'+esc(t.aiWait)}
   else if(a.own){el.innerHTML='<span class="dot on"></span>'+esc(t.keyOn)+' · <a href="#" data-act="delkey">'+esc(t.keyDel)+'</a>'}
+  else if(a.server){el.innerHTML='<span class="dot on"></span>'+esc(t.aiOn)}
   else if(a.sample&&a.images){el.innerHTML='<span class="dot on"></span>'+esc(t.aiOn)}
   else{el.innerHTML='<span class="dot off"></span>IA off'}
   const n=$('#ainote');if(n)n.hidden=!(a&&!(a.sample&&a.images));
