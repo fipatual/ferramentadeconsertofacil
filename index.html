@@ -157,6 +157,12 @@ button.chip:hover,a.chip:hover{border-color:var(--accent)}
 .pro b{font-weight:600}
 .meta{font:500 12px/1.4 var(--mono);color:var(--muted)}
 .ph{font:500 16px/1 var(--mono);user-select:all}
+.pro .addr{font-size:13px;color:var(--muted);overflow-wrap:anywhere}
+.pro .row{flex-wrap:wrap}
+html,body{overflow-x:hidden;overflow-x:clip;max-width:100%}
+body{touch-action:pan-y pinch-zoom}
+img,svg,video,canvas{max-width:100%}
+@media (max-width:380px){.top .seg button{padding:7px 7px;font-size:11px}.top .brand{font-size:19px}.top .wrap{gap:8px}}
 .ex{font:500 11px/1 var(--mono);border:1px solid var(--line);border-radius:5px;padding:3px 5px;color:var(--muted);margin-left:auto;align-self:flex-start}
 
 .bar{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--surface);border-top:1px solid var(--line);
@@ -223,7 +229,7 @@ pt:{
  steps:'Passo a passo',safety:'Segurança',proIf:'Chame um profissional se',
  feelQ:'Como você se sente com este reparo?',feel:['Consigo fazer','Tenho dúvidas','Prefiro um profissional'],
  feelCan:'Mesmo assim, este reparo envolve risco. Considere pedir um orçamento.',
- pros:'Profissionais para este serviço',prosNote:'Exemplos fictícios para validar o fluxo. Na versão final, esta lista vem de um diretório real.',
+ pros:'Profissionais para este serviço',prosNote:c=>`Profissionais reais do Google Maps${c?' perto de '+c:' perto de você'}, ordenados pela nota no Google. A localização é aproximada, pela sua conexão.`,prosLoading:'Buscando profissionais perto de você…',prosNone:'Não encontrei profissionais perto de você. Use a busca no Google Maps abaixo.',prosErr:'A busca de profissionais não está disponível agora. Use a busca no Google Maps abaixo.',reviews:'avaliações',call:'Ligar',seeMap:'Ver no Maps',kmAway:'km (aprox.)',
  near:'Buscar profissionais perto de você',copyPhone:'Copiar telefone',copyReq:'Copiar pedido de orçamento',copied:'Copiado',copyFail:'Não foi possível copiar. Selecione o texto.',
  jobs:'serviços',away:'resposta',example:'exemplo',
  newD:'Novo diagnóstico',callPro:'Falar com profissional',
@@ -252,7 +258,7 @@ en:{
  steps:'Step by step',safety:'Safety',proIf:'Call a professional if',
  feelQ:'How do you feel about this repair?',feel:['I can do it','I have doubts','I prefer a professional'],
  feelCan:'This repair still carries risk. Consider getting a quote.',
- pros:'Professionals for this job',prosNote:'Fictional examples to validate the flow. In the final version this list comes from a real directory.',
+ pros:'Professionals for this job',prosNote:c=>`Real professionals from Google Maps${c?' near '+c:' near you'}, sorted by Google rating. Location is approximate, based on your connection.`,prosLoading:'Finding professionals near you…',prosNone:"I couldn't find professionals near you. Use the Google Maps search below.",prosErr:'Professional search is not available right now. Use the Google Maps search below.',reviews:'reviews',call:'Call',seeMap:'See on Maps',kmAway:'km (approx.)',
  near:'Find professionals near you',copyPhone:'Copy phone',copyReq:'Copy quote request',copied:'Copied',copyFail:"Couldn't copy. Select the text.",
  jobs:'jobs',away:'reply',example:'example',
  newD:'New diagnosis',callPro:'Talk to a pro',
@@ -278,13 +284,19 @@ const STORES={
      ["Lowe's",q=>'https://www.lowes.com/search?searchTerm='+encodeURIComponent(q)],
      ['Amazon',q=>'https://www.amazon.com/s?k='+encodeURIComponent(q)]]};
 
-const PROS={
- BR:[{n:'Marcos Ribeiro',r:4.8,j:212,d:'2,1 km',eta:'~20 min',ph:'(00) 0000-0001'},
-     {n:'Aline Souza Reparos',r:4.7,j:148,d:'3,4 km',eta:'~35 min',ph:'(00) 0000-0002'},
-     {n:'Casa em Ordem',r:4.6,j:97,d:'5,0 km',eta:'~1 h',ph:'(00) 0000-0003'}],
- US:[{n:'Dave Miller',r:4.8,j:240,d:'1.4 mi',eta:'~20 min',ph:'(555) 010-0101'},
-     {n:'Brightfix Home Repair',r:4.7,j:166,d:'2.6 mi',eta:'~35 min',ph:'(555) 010-0102'},
-     {n:'Torres & Sons',r:4.6,j:92,d:'4.1 mi',eta:'~1 h',ph:'(555) 010-0103'}]};
+/* Profissionais reais: buscados em /api/profissionais (Google Places), perto da localização aproximada do IP */
+const prosCache={};
+function loadPros(cat,q,m){
+  const k=m+'|'+cat;
+  if(prosCache[k])return;
+  if(!SERVER_AI){prosCache[k]={status:'err'};return}
+  prosCache[k]={status:'loading'};
+  fetch('/api/profissionais?q='+encodeURIComponent(q)+'&lang='+(m==='US'?'en':'pt'))
+    .then(r=>r.ok?r.json():Promise.reject(r.status))
+    .then(d=>{prosCache[k]={status:d.list&&d.list.length?'ok':'none',list:d.list||[],city:d.city||''}})
+    .catch(()=>{prosCache[k]={status:'err'}})
+    .then(()=>{if(state.view==='result')render()});
+}
 
 /* ---------- built-in guides (no AI) ---------- */
 const KB=[
@@ -621,11 +633,13 @@ function viewUnidentified(){
 }
 
 function proCard(p,r,t){
-  const req=t.msg(r);
-  return `<div class="card pro"><div class="who"><div class="av" aria-hidden="true">${esc(p.n.trim()[0])}</div>
-    <div style="min-width:0"><b>${esc(p.n)}</b><div class="meta">★ ${p.r} · ${p.j} ${t.jobs}<br>${esc(p.d)} · ${t.away} ${esc(p.eta)}</div></div><span class="ex">${t.example}</span></div>
-    <div class="ph">${esc(p.ph)}</div>
-    <div class="row"><button class="btn" data-act="copy" data-copy="${esc(p.ph)}">${t.copyPhone}</button><button class="btn" data-act="copy" data-copy="${esc(req)}">${t.copyReq}</button></div></div>`;
+  const req=t.msg(r),lg=lang();
+  const rating=p.rating?p.rating.toLocaleString(lg==='pt'?'pt-BR':'en-US',{minimumFractionDigits:1,maximumFractionDigits:1}):'–';
+  return `<div class="card pro"><div class="who"><div class="av" aria-hidden="true">${esc(p.name.trim()[0]||'?')}</div>
+    <div style="min-width:0"><b>${esc(p.name)}</b><div class="meta">★ ${rating} · ${p.reviews} ${t.reviews}${p.km!=null?`<br>${String(p.km).replace('.',lg==='pt'?',':'.')} ${t.kmAway}`:''}</div></div></div>
+    ${p.address?`<div class="addr">${esc(p.address)}</div>`:''}
+    ${p.phone?`<div class="ph">${esc(p.phone)}</div>`:''}
+    <div class="row">${p.tel?`<a class="btn" href="tel:${esc(p.tel)}">${t.call}</a><button class="btn" data-act="copy" data-copy="${esc(p.phone)}">${t.copyPhone}</button>`:''}${p.maps?`<a class="btn" href="${esc(p.maps)}" target="_blank" rel="noopener noreferrer">${t.seeMap}</a>`:''}<button class="btn" data-act="copy" data-copy="${esc(req)}">${t.copyReq}</button></div></div>`;
 }
 
 function viewResult(){
@@ -637,7 +651,9 @@ function viewResult(){
   const showPros=state.feel==='doubt'||state.feel==='pro'||r.cx>=4;
   const catName=(CATS[r.cat]||CATS.general)[lg];
   const stores=STORES[m]||STORES.BR;
-  const pros=PROS[m]||PROS.BR;
+  const pk=m+'|'+r.cat;
+  if(showPros)loadPros(r.cat,catName.split(' / ')[0],m);
+  const pr=prosCache[pk]||{status:'loading'};
   const mapUrl='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(t.mapQ(catName));
   return `<div class="stack">
    <div class="titlebox">${state.url&&r.src==='ai'?`<img class="thumb" src="${esc(state.url)}" alt="">`:''}
@@ -672,8 +688,8 @@ function viewResult(){
    <section class="sec"><h2>${t.feelQ}</h2><div class="feel">${t.feel.map((f,i)=>{const v=['can','doubt','pro'][i];return `<button data-act="feel" data-v="${v}" aria-pressed="${state.feel===v}">${f}</button>`}).join('')}</div>
      ${state.feel==='can'&&r.cx>=4?`<div class="notice">${t.feelCan}</div>`:''}</section>
 
-   ${showPros?`<section class="sec" id="pros"><h2>${t.pros}</h2><p class="small">${t.prosNote}</p>
-     ${pros.map(p=>proCard(p,r,t)).join('')}
+   ${showPros?`<section class="sec" id="pros"><h2>${t.pros}</h2>
+     ${pr.status==='ok'?`<p class="small">${esc(t.prosNote(pr.city))}</p>${pr.list.map(p=>proCard(p,r,t)).join('')}`:`<p class="small">${pr.status==='loading'?t.prosLoading:pr.status==='none'?t.prosNone:t.prosErr}</p>`}
      <a class="btn block" href="${esc(mapUrl)}" target="_blank" rel="noopener noreferrer">${t.near}</a></section>`:''}
 
    <p class="small">${t.disc}</p>
